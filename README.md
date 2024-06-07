@@ -1,3 +1,3 @@
 # scannerx
 
-this tool is under developement
+this tool is under Development
