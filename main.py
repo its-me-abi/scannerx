@@ -1,12 +1,16 @@
-import sublist3r
-import subprocess
-import nmap
-import requests
-import json
-import socket
-import ssl
-from urllib.parse import urlparse
-import dns.resolver
+try:
+   import sublist3r
+   import subprocess
+   import nmap
+   import requests
+   import json
+   import socket
+   import ssl
+   from urllib.parse import urlparse
+   import dns.resolver
+except ModuleNotFoundError  as error:
+    print(f" * error running because  module named {error.name} not found please install it \n.try this  command 'pip install {error.name}'  ")
+
 
 def get_subdomains(domain):
     subdomains = sublist3r.main(domain, 40, savefile=None, ports=None, silent=True, verbose=False, enable_bruteforce=False, engines=None)
