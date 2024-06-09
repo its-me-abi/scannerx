@@ -76,7 +76,7 @@ def main():
     # target_ip = socket.gethostbyname(target)
     target_ip = dns_lookup(target)
     
-    print("[+] whois {target}...")                  
+    print(f"[+] whois {target}...")                  
     print("")
     subprocess.call(f"whois {target}", shell=True)          # calling whois as terminal command. 
 
