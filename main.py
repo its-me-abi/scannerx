@@ -46,10 +46,10 @@ def port_scan(target):
         return {"error": str(e)}
 
 
-def vulnerability_scan(target):
+def vulnerability_scan(target_ip):
     nm = nmap.PortScanner()
-    nm.scan(target, arguments='--script vuln')
-    scan_data = nm[target]
+    nm.scan(target_ip, arguments='--script vuln')
+    scan_data = nm[target_ip]
     return scan_data
 
 def get_dns_records(domain):
