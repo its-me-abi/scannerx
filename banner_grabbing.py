@@ -16,7 +16,7 @@ def main():
             banner = banner_grab(ip, 80)  # Assuming HTTP port
             print(f"Banner for {subdomain} ({ip}): {banner}")
         except Exception as e:
-            print(f"Could not grab banner for {subdomain}: {e}")
+            print(f"Could not grab banner for {subdomain}:")
 
 
 if __name__ == "__main__":
