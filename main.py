@@ -72,7 +72,7 @@ def get_ssl_info(domain):
     return cert
 
 def main():
-    target = input("Enter the target domain or IP address: ")
+    target = input("Enter the target domain : ")
     # target_ip = socket.gethostbyname(target)
     target_ip = dns_lookup(target)
     
