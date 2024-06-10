@@ -1,0 +1,12 @@
+beautifulsoup4
+builtwith
+dnspython
+nmap
+requests
+shodan
+sublist3r @ git+https://github.com/aboul3la/Sublist3r.git
+tldextract
+whois
+
+
+use command:-pip install -r requirements.txt
