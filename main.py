@@ -46,6 +46,25 @@ def port_scan(target):
         return {"error": str(e)}
 
 
+def banner_grab(target, port):
+    s = socket.socket()
+    s.connect((target, port))
+    s.send(b'HEAD / HTTP/1.1\r\n\r\n')
+    banner = s.recv(1024)
+    return banner.decode()
+
+def detect_os(target):
+    nm = nmap.PortScanner()
+    try:
+        nm.scan(target, arguments='-O')
+        if 'osmatch' in nm[target]:
+            os_matches = nm[target]['osmatch']
+            return os_matches
+        else:
+            return "No OS detected"
+    except Exception as e:
+        return str(e)
+
 def vulnerability_scan(target_ip):
     nm = nmap.PortScanner()
     nm.scan(target_ip, arguments='--script vuln')
@@ -83,7 +102,12 @@ def main():
     print(f"\n[*] Gathering subdomains for {target}...")
     subdomains = get_subdomains(target)
     print(json.dumps(subdomains, indent=4))
-    
+
+
+    print("[+] Detecting operating system...")
+    os_detection_results = detect_os(target)
+    print(f"OS Detection Results: {os_detection_results}")
+
     
     # print(f"\n[+] Gathering domain information for {target}...")
     # domain_info = get_domain_info(target)
@@ -110,6 +134,17 @@ def main():
     print(f"\n[*] Conducting vulnerability scan on {target_ip}...")
     vulnerability_scan_data = vulnerability_scan(target_ip)
     print(json.dumps(vulnerability_scan_data, indent=4))
+
+    print("Performing banner grabbing...")                      # Banner Grabbing
+    for subdomain in subdomains:
+        try:
+            ip = socket.gethostbyname(subdomain)                # time taking process set in end 
+            banner = banner_grab(ip, 80)  # Assuming HTTP port  
+            print(f"Banner for {subdomain} ({ip}): {banner}")
+        except Exception as e:
+            print(f"Could not grab banner for {subdomain}:")
+
+    # subprocess.call("python network.py", shell=True)        #  requires user input again but also generates external data files
 
 if __name__ == "__main__":
     main()
