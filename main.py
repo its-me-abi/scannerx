@@ -11,21 +11,10 @@ import dns.resolver
 def get_subdomains(domain):
     subdomains = sublist3r.main(domain, 40, savefile=None, ports=None, silent=True, verbose=False, enable_bruteforce=False, engines=None)
     return subdomains
-    
-
-# def get_domain_info(domain):
-#     domain_info = whois.whois(domain)             # funtion not working
-#     return domain_info
 
 def get_http_headers(url):
     response = requests.get(url)
     return response.headers
-
-def port_scan(target):
-    nm = nmap.PortScanner()
-    nm.scan(target, '1-65535')
-    scan_data = nm[target]
-    return scan_data
 
 def dns_lookup(target):
     try:
@@ -33,7 +22,6 @@ def dns_lookup(target):
         return target_ip
     except socket.gaierror:
         return None
-
 
 def port_scan(target):
     nm = nmap.PortScanner()
@@ -44,7 +32,6 @@ def port_scan(target):
         return scan_data
     except Exception as e:
         return {"error": str(e)}
-
 
 def banner_grab(target, port):
     s = socket.socket()
@@ -92,59 +79,59 @@ def get_ssl_info(domain):
 
 def main():
     target = input("Enter the target domain: ")
-    # target_ip = socket.gethostbyname(target)
     target_ip = dns_lookup(target)
-    
-    print(f"[+] whois {target}...")                  
-    print("")
-    subprocess.call(f"whois {target}", shell=True)          # calling whois as terminal command. 
+
+    results = {}
+
+    print(f"[+] whois {target}...")
+    whois_result = subprocess.getoutput(f"whois {target}")  # Call WHOIS command and get the output
+    results["whois"] = whois_result
 
     print(f"\n[*] Gathering subdomains for {target}...")
     subdomains = get_subdomains(target)
-    print(json.dumps(subdomains, indent=4))
-
+    results["subdomains"] = subdomains
 
     print("[+] Detecting operating system...")
     os_detection_results = detect_os(target)
-    print(f"OS Detection Results: {os_detection_results}")
-
-    
-    # print(f"\n[+] Gathering domain information for {target}...")
-    # domain_info = get_domain_info(target)
-    # print(domain_info)
-    
+    results["os_detection"] = os_detection_results
 
     print(f"\n[+] Gathering DNS records for {target}...")
     dns_records = get_dns_records(target)
-    print(json.dumps(dns_records, indent=4))
-    
+    results["dns_records"] = dns_records
+
     print(f"\n[+] Gathering SSL/TLS information for {target}...")
     ssl_info = get_ssl_info(target)
-    print(json.dumps(ssl_info, indent=4))
-    
+    results["ssl_info"] = ssl_info
+
     print(f"\n[+] Gathering HTTP headers for {target}...")
-    url = f"http://www.{target}"
+    url = f"http://{target}"
     http_headers = get_http_headers(url)
-    print(json.dumps(dict(http_headers), indent=4))
-    
+    results["http_headers"] = dict(http_headers)
+
     print(f"\n[*] Conducting port scan on {target_ip}...")
     port_scan_data = port_scan(target_ip)
-    print(json.dumps(port_scan_data, indent=4))
-    
+    results["port_scan"] = port_scan_data
+
     print(f"\n[*] Conducting vulnerability scan on {target_ip}...")
     vulnerability_scan_data = vulnerability_scan(target_ip)
-    print(json.dumps(vulnerability_scan_data, indent=4))
+    results["vulnerability_scan"] = vulnerability_scan_data
 
-    print("Performing banner grabbing...")                      # Banner Grabbing
+    print("Performing banner grabbing...")
+    banner_results = {}
     for subdomain in subdomains:
         try:
-            ip = socket.gethostbyname(subdomain)                # time taking process set in end 
-            banner = banner_grab(ip, 80)  # Assuming HTTP port  
-            print(f"Banner for {subdomain} ({ip}): {banner}")
+            ip = socket.gethostbyname(subdomain)
+            banner = banner_grab(ip, 80)  # Assuming HTTP port
+            banner_results[subdomain] = banner
         except Exception as e:
-            print(f"Could not grab banner for {subdomain}:")
+            banner_results[subdomain] = f"Could not grab banner: {e}"
+    results["banner_grabbing"] = banner_results
 
-    # subprocess.call("python network.py", shell=True)        #  requires user input again but also generates external data files
+    # Save results to JSON file
+    with open(f"{target}_results.json", "w") as f:
+        json.dump(results, f, indent=4)
+
+    print(f"\nResults saved to {target}_results.json")
 
 if __name__ == "__main__":
     main()
